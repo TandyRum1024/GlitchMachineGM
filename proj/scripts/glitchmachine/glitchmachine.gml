@@ -2,6 +2,8 @@
 	Illegal bytebeat stuff
 	MMXXI ZIK
 */
+#macro BYTEBEAT_MAXINT 0xFFFFFFFF
+
 enum eTOKEN
 {
 	LB = 0,
@@ -77,13 +79,13 @@ function Glitch () constructor
 	/// @func plz(buff, num_samples)
 	/// @desc Evaluate program, fill the buffer with given amount of sound samples
 	plz = function (_buff, _num_samples) {
-		var i;
+		var i, _t = t, _stack = stack;
 		var _token, _v1, _v2, _v3, _result;
 		
 		// Repeat as much as needed
 		repeat (_num_samples)
 		{
-			//bunger_log("T: ", t);
+			//bunger_log("T: ", _t);
 			
 			#region Execute program, fill 1 sample to buffer
 			i = 0;
@@ -97,156 +99,214 @@ function Glitch () constructor
 				{
 					case eTOKEN.NUM:
 						// push value to stack
-						push(_token[1]);
+						// (push _token[1])
+						tosp = (tosp+1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _token[1] & BYTEBEAT_MAXINT);
 						break;
 					case eTOKEN.VAR:
 						_v1 = register[$ _token[1]];
 						_v1 = (_v1 == undefined) ? 0 : _v1;
-						push(_v1);
+						// (push _v1)
+						tosp = (tosp+1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _v1 & BYTEBEAT_MAXINT);
 						break;
 					case eTOKEN.T:
-						push(t);
+						// (push _t)
+						//show_debug_message("PUSH T " + string(_t & BYTEBEAT_MAXINT));
+						tosp = (tosp+1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _t & BYTEBEAT_MAXINT);
 						break;
 				
-					case eTOKEN.PUT: // put value1 to stack[TOSP-value2]
-						// get v3: top value from stack % 256 + 1
-						var _tosp = buffer_tell(stack) >> 2;
-						_v3 = buffer_peek(stack, buffer_tell(stack)-4, buffer_u32) & 0xFF + 1;
+					case eTOKEN.PUT: // put value1 to _stack[TOSP-value2]
+						// get v3: top value from _stack % 256 + 1
+						var _tosp = buffer_tell(_stack) >> 2;
+						_v3 = buffer_peek(_stack, buffer_tell(_stack)-4, buffer_u32) & 0xFF + 1;
 						
-						// set stack[TOSP-v3] to second-top value from stack
-						buffer_seek(stack, buffer_seek_start, ((tosp-_v3) & 0xFF) << 2);
-						buffer_write(stack, buffer_u32, buffer_peek(stack, ((tosp-2) & 0xFF) << 1, buffer_u32));
+						// set _stack[TOSP-v3] to second-top value from _stack
+						buffer_seek(_stack, buffer_seek_start, ((tosp-_v3) & 0xFF) << 2);
+						buffer_write(_stack, buffer_u32, buffer_peek(_stack, ((tosp-2) & 0xFF) << 1, buffer_u32));
 					
-						buffer_seek(stack, buffer_seek_start, tosp << 2); // reset write pointer to TOSP
+						buffer_seek(_stack, buffer_seek_start, tosp << 2); // reset write pointer to TOSP
 						break;
 				
 					case eTOKEN.DROP: // pop one value
-						pop();
+						//pop();
+						//var _v = buffer_peek(_stack, tosp<<2, buffer_u32);
+						tosp = (tosp-1) & 0xFF; // decrement & emulate uint8 behaviour on TOSP
 						break;
 				
 					case eTOKEN.MUL:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2 * _v1);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2 * _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 * _v1) & BYTEBEAT_MAXINT);
 						break;
 				
 					case eTOKEN.DIV:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push((_v1 == 0) ? 0 : (_v2 / _v1));
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push((_v1 == 0) ? 0 : (_v2 / _v1));
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, ((_v1 == 0) ? 0 : (_v2 / _v1)) & BYTEBEAT_MAXINT);
 						break;
 					
 					case eTOKEN.ADD:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2 + _v1);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2 + _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 + _v1) & BYTEBEAT_MAXINT);
 						break;
 				
 					case eTOKEN.SUB:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2 - _v1);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2 - _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 - _v1) & BYTEBEAT_MAXINT);
 						break;
 				
 					case eTOKEN.MOD:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push((_v1 == 0) ? 0 : (_v2 % _v1));
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push((_v1 == 0) ? 0 : (_v2 % _v1));
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, ((_v1 == 0) ? 0 : (_v2 % _v1)) & BYTEBEAT_MAXINT);
 						break;
 				
 					case eTOKEN.LSHIFT:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push((_v2 << _v1) & 0xFFFFFFFF);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push((_v2 << _v1) & 0xFFFFFFFF);
+						//show_debug_message(string(_v2) + " v2 << v1 " + string(_v1) + " : TOSP -> " + string(tosp) + ", " + string((tosp-1)<<2));
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 << _v1) & BYTEBEAT_MAXINT);
 						break;
 				
 					case eTOKEN.RSHIFT:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push((_v2 >> _v1) & 0xFFFFFFFF);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push((_v2 >> _v1) & 0xFFFFFFFF);
 						// bunger_log(_v2, " >> ", _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 >> _v1) & BYTEBEAT_MAXINT);
 						break;
 				
 					case eTOKEN.AND:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2 & _v1);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2 & _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 & _v1));
 						break;
 				
 					case eTOKEN.OR:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2 | _v1);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2 | _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 | _v1));
 						break;
 				
 					case eTOKEN.XOR:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2 ^ _v1);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2 ^ _v1);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, (_v2 ^ _v1));
 						break;
 					
 					case eTOKEN.NOT:
 						// pop 1 value
-						_v1 = pop();
-						push(~_v1);
+						//_v1 = pop();
+						//push(~_v1);
+						buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, ~buffer_peek(_stack, tosp<<2, buffer_u32));
 						break;
 				
 					case eTOKEN.DUP:
 						// pop 1 value
-						_v1 = pop();
-						push(_v1);
-						push(_v1);
+						//_v1 = pop();
+						//push(_v1);
+						//push(_v1);
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						tosp = (tosp+1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _v1);
 						break;
 				
 					case eTOKEN.PICK:
-						// get v1: stack[TOSP]
-						_v1 = buffer_peek(stack, (tosp - 1) << 2, buffer_u8);
+						// get v1: _stack[TOSP]
+						_v1 = buffer_peek(_stack, ((tosp-1) & 0xFF) << 2, buffer_u8);
 					
-						// push stack[TOSP - v1] to stack
-						push(buffer_peek(stack, ((tosp - 1 - _v1) & 0xFF) << 2, buffer_u8));
+						// push _stack[TOSP - v1] to _stack
+						//push(buffer_peek(_stack, ((tosp - 1 - _v1) & 0xFF) << 2, buffer_u8));
+						tosp = (tosp+1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, buffer_peek(_stack, ((tosp - 1 - _v1) & 0xFF) << 2, buffer_u8));
 						break;
 				
 					case eTOKEN.SWAP:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v1);
-						push(_v2);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v1);
+						//push(_v2);
+						buffer_seek(_stack, buffer_seek_start, (tosp-1)<<2); buffer_write(_stack, buffer_u32, _v1);
+						buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _v2);
 						break;
 				
 					case eTOKEN.LT:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2<_v1 ? 0xFFFFFFFF : 0x0);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2<_v1 ? 0xFFFFFFFF : 0x0);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _v2 < _v1 ? 0xFFFFFFFF : 0x0);
 						break;
 				
 					case eTOKEN.GT:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2>_v1 ? 0xFFFFFFFF : 0x0);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2>_v1 ? 0xFFFFFFFF : 0x0);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _v2 > _v1 ? 0xFFFFFFFF : 0x0);
 						break;
 				
 					case eTOKEN.EQ:
 						// pop 2 value
-						_v1 = pop(); _v2 = pop();
-						push(_v2==_v1 ? 0xFFFFFFFF : 0x0);
+						//_v1 = pop(); _v2 = pop();
+						_v1 = buffer_peek(_stack, tosp<<2, buffer_u32);
+						_v2 = buffer_peek(_stack, ((tosp-1)&0xFF)<<2, buffer_u32);
+						//push(_v2==_v1 ? 0xFFFFFFFF : 0x0);
+						tosp = (tosp-1) & 0xFF; buffer_seek(_stack, buffer_seek_start, tosp<<2); buffer_write(_stack, buffer_u32, _v2 == _v1 ? 0xFFFFFFFF : 0x0);
 						break;
 				}
 				
 				i++;
 			}
 			
-			// Increment T, fill the audio buffer with last value from the stack
-			t++;
+			// Increment temporary T, fill the audio buffer with last value from the stack
+			//t++;
+			_t++;
 			
 			// //buffer_peek(stack, ((tosp-1)&0xFF)<<2, buffer_u32) & 0xFF;
 			//var _idx = (buffer_tell(stack)-4+buffer_get_size(stack)) % buffer_get_size(stack);
 			//var _samp = buffer_peek(stack, _idx, buffer_u32) & 0xFF;
 			//buffer_write(_buff, buffer_u8, _samp);
 			
-			buffer_write(_buff, buffer_u8, buffer_peek(stack, tosp<<2, buffer_u32) & 0xFF);
+			buffer_write(_buff, buffer_u8, buffer_peek(_stack, tosp<<2, buffer_u32) & 0xFF);
 			//bunger_log("STACK[", _idx, "]: ", _samp);
 			#endregion
 		}
+		
+		// Update t
+		t = _t;
 	};
 	
 	push = function (_val) {

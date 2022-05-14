@@ -7,7 +7,7 @@ if (async_load[? "queue_shutdown"] == false) // Normal playback
 	// Fill the buffer, and queue it ASAP
 	onBufferDone(_buffer_id, _id);
 	
-	show_debug_message("BUFFER " + string(_buffer_id) + " REFILL");
+	//show_debug_message("BUFFER " + string(_buffer_id) + " REFILL");
 }
 
 /*

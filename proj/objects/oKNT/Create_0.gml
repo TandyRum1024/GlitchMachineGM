@@ -5,7 +5,8 @@ loadTime = current_time;
 
 // Set up the audio buffer
 dspRate = 8000;
-dspBuffSize = 256; // 12;
+//dspBuffSize = 256; // 12;
+dspBuffSize = 128;
 dspBuffNum = 40;
 dspBuffList = [];
 
@@ -31,7 +32,7 @@ fillAndQueueAll = function () {
 		glitch.plz(dspBuffList[i], dspBuffSize);
 		audio_queue_sound(dspSound, dspBuffList[i], 0, dspBuffSize);
 		
-		show_debug_message("BUFFER " + string(dspBuffList[i]) + " QUEUE");
+		//show_debug_message("BUFFER " + string(dspBuffList[i]) + " QUEUE");
 	}
 	dspBuffPlaying = dspBuffList[0];
 	dspBuffReady = dspBuffNum;
@@ -57,7 +58,7 @@ onBufferDone = function (_buff, _audio) {
 		audio_queue_sound(dspSound, _buff, 0, dspBuffSize);
 		dspBuffPlaying = _buff;
 		
-		bunger_log("AUDIO REVIVED");
+		//bunger_log("AUDIO REVIVED");
 		audio_play_sound(dspSound, 0, false);
 		audio_sound_gain(dspSound, dspVolume, 0);
 	}

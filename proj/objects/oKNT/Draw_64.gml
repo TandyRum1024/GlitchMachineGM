@@ -1,6 +1,6 @@
 /// @description delicious.
 var _ww = window_get_width(), _wh = window_get_height();
-
+/*
 #region Draw visualizations
 if (!surface_exists(visualSurf))
 	visualSurf = surface_create(256, dspBuffSize);
@@ -33,7 +33,7 @@ if (dspBuffPlaying != undefined)
 	draw_surface_stretched(visualSurf, 0, 0, _ww, _wh);
 }
 #endregion
-
+*/
 // Draw Debug UI
 draw_set_font(fntDefault);
 
@@ -75,10 +75,11 @@ draw_rectangle_colour(_xx - 6, 2, _ww-2, 2 + string_height(_prg) * 2, c_black, c
 draw_text_transformed_color(_xx, 8, _prg, 2, 2, 0, c_white, c_white, c_white, c_white, 1);
 
 // Draw stack
-var _stack_info = "TOSP: " + string(glitch.tosp) + " | T: " + string(glitch.t) + "\n";
+//var _stack_info = "TOSP: " + string(glitch.tosp) + " | T: " + string(glitch.t) + "\n";
+var _stack_info = "TOSP: " + string(0) + " | T: " + string(glitch.t) + "\n";
 draw_set_halign(0); draw_set_valign(1);
 draw_text_transformed_color(8, 8, _stack_info, 2, 2, 0, c_white, c_white, c_white, c_white, 1);
-
+/*
 var _x = 8, _y = 32,
 	_cell_sz = 32;
 draw_set_halign(1); draw_set_valign(1);
@@ -111,3 +112,4 @@ for (var i=0; i<dspBuffSize; i++)
 	_x += _sample_margin;
 }
 draw_primitive_end();
+*/
