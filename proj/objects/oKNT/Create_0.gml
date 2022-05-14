@@ -5,7 +5,6 @@ loadTime = current_time;
 
 // Set up the audio buffer
 dspRate = 8000;
-//dspBuffSize = 256; // 12;
 dspBuffSize = 128;
 dspBuffNum = 40;
 dspBuffList = [];
@@ -38,12 +37,11 @@ fillAndQueueAll = function () {
 	dspBuffReady = dspBuffNum;
 };
 onBufferDone = function (_buff, _audio) {
-	if (audio_is_playing(_audio))
+	if (audio_is_playing(dspSound))
 	{
 		// place new data in the used buffer
 		buffer_seek(_buff, buffer_seek_start, 0);
 		glitch.plz(_buff, dspBuffSize);
-		audio_free_buffer_sound(dspSound);
 		audio_queue_sound(dspSound, _buff, 0, dspBuffSize);
 		dspBuffPlaying = _buff;
 	}
@@ -71,4 +69,5 @@ audio_sound_gain(dspSound, dspVolume, 0);
 // Sick visuals
 visualSurf = surface_create(256, dspBuffSize);
 visualSurfPrev = surface_create(256, dspBuffSize);
-buffSurf = buffer_create(dspBuffSize*dspBuffSize*4, buffer_fast, 1);
+buffSurf = buffer_create(256*dspBuffSize*4, buffer_fast, 1);
+

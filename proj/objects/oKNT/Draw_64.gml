@@ -1,6 +1,6 @@
 /// @description delicious.
 var _ww = window_get_width(), _wh = window_get_height();
-/*
+
 #region Draw visualizations
 if (!surface_exists(visualSurf))
 	visualSurf = surface_create(256, dspBuffSize);
@@ -8,12 +8,10 @@ if (!surface_exists(visualSurfPrev))
 	visualSurfPrev = surface_create(256, dspBuffSize);
 
 surface_copy(visualSurfPrev, 0, 0, visualSurf);
-
 surface_set_target(visualSurf);
-// scroll
-draw_surface(visualSurfPrev, 1, 0);
+	// scroll
+	draw_surface(visualSurfPrev, 1, 0);
 surface_reset_target();
-
 
 // Set surface values from buffer
 if (dspBuffPlaying != undefined)
@@ -33,7 +31,7 @@ if (dspBuffPlaying != undefined)
 	draw_surface_stretched(visualSurf, 0, 0, _ww, _wh);
 }
 #endregion
-*/
+
 // Draw Debug UI
 draw_set_font(fntDefault);
 
@@ -75,27 +73,35 @@ draw_rectangle_colour(_xx - 6, 2, _ww-2, 2 + string_height(_prg) * 2, c_black, c
 draw_text_transformed_color(_xx, 8, _prg, 2, 2, 0, c_white, c_white, c_white, c_white, 1);
 
 // Draw stack
-//var _stack_info = "TOSP: " + string(glitch.tosp) + " | T: " + string(glitch.t) + "\n";
-var _stack_info = "TOSP: " + string(0) + " | T: " + string(glitch.t) + "\n";
+var _stack_info = "TOSP: " + string(glitch.tosp) + " | T: " + string(glitch.t) + "\n";
 draw_set_halign(0); draw_set_valign(1);
 draw_text_transformed_color(8, 8, _stack_info, 2, 2, 0, c_white, c_white, c_white, c_white, 1);
-/*
+
 var _x = 8, _y = 32,
+	_cell_w = 16,
 	_cell_sz = 32;
 draw_set_halign(1); draw_set_valign(1);
-var _dx = _x;
+var _dx = _x, _dy = _y;
 for (var i=0; i<=0xFF; i++)
 {
-	var _v = buffer_peek(glitch.stack, i, buffer_u32), _c = merge_color(0, c_white, _v/0xFFFFFFFF);
+	var _v = buffer_peek(glitch.stack, i << 2, buffer_u32),
+		_h = ((_v >> 20) & 0xFFF) / 4095,
+		_s = ((_v >> 8) & 0xFFF) / 4095,
+		_v = (_v & 0xFF) / 255,
+		_c = make_color_hsv(_h*255, _s*255, _v*255);
+	_dx = x + (i % _cell_w) * _cell_sz;
+	_dy = y + (i div _cell_w) * _cell_sz;
+	
 	//draw_rectangle_color(_dx, _y, _dx+_cell_sz, _y+_cell_sz, _c, _c, _c, _c, false);
-	draw_sprite_stretched_ext(sprWhite, 0, _dx, _y, _cell_sz, _cell_sz, _c, 1);
-	draw_text_transformed_color(_dx+(_cell_sz>>1), _y+(_cell_sz>>1), string(_v), 0.5, 0.5, 0, c_blue, c_blue, c_blue, c_blue, 1);
-	_dx += _cell_sz;
-	if ((i+1) % 16 == 0)
+	draw_sprite_stretched_ext(sprWhite, 0, _dx, _dy, _cell_sz, _cell_sz, _c, 1);
+	draw_text_transformed_color(_dx+(_cell_sz>>1), _dy+(_cell_sz>>1), __tohex(_v), 1, 1, 0, c_blue, c_blue, c_blue, c_blue, 1);
+	/*
+	_dy += _cell_sz;
+	if (i % 16 == 0)
 	{
-		_dx = _x;
-		_y += _cell_sz;
-	}
+		_dy = _y;
+		_dx += _cell_sz;
+	}*/
 }
 
 draw_sprite_stretched_ext(sprWhite, 0, _x + _cell_sz * 20, osc_cos_lerp(1, _y, _y+64), _cell_sz, _cell_sz, c_white, 1);
@@ -112,4 +118,4 @@ for (var i=0; i<dspBuffSize; i++)
 	_x += _sample_margin;
 }
 draw_primitive_end();
-*/
+
