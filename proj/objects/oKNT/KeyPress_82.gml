@@ -6,7 +6,8 @@ if (currentFile == "")
 
 if (currentFile != "")
 {
-	glitch = glitch_load_file(currentFile);
+	glitch.load(currentFile, true);
+	dspRate = glitch.rate;
 	
 	audio_free_play_queue(dspSound);
 	dspSound = audio_create_play_queue(buffer_u8, dspRate, audio_mono);

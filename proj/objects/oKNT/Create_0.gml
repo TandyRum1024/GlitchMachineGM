@@ -1,12 +1,12 @@
 /// @description pain
-currentFile = "";
-glitch = glitch_load_file("tune-test.txt");
+currentFile = "tune-test.txt";
+glitch = glitch_load_file(currentFile);
 loadTime = current_time;
 
 // Set up the audio buffer
 dspRate = 8000;
-dspBuffSize = 128;
-dspBuffNum = 40;
+dspBuffSize = 256;
+dspBuffNum = 10;
 dspBuffList = [];
 
 dspBuffPlaying = undefined; // currently playing buffer

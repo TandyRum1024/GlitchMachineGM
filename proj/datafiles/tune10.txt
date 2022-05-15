@@ -1,0 +1,79 @@
+$"BOOBS :D"
+(
+	- $r is the tick speed in Hz
+	- $a is amplitude [volume] from 0 - 100
+	- $0 resets the song to start when it is live-loaded
+
+	- x is a value from 0 to 5, based on the current room outwards from
+		the center of the map... starting room is 0... 9 total rooms
+	- y is a random value set at game start
+	- u is set to 1 when a player reaches the final room
+	- v counts up to 255 over 10 seconds once the player leaps into
+		the EGGNOGG
+)
+
+$r8000
+$a30
+$0)
+
+t 8 t 14 >> 2 % + >> 5 *)
+(t 10 >> 5 *)
+t 9 & |
+
+( Weird )
+3 & 1 + t *
+2 & 1 + t *)
+
+t 16 >> 3 & 1 + /
+
+ 10 * 12 / )
+
+t 11 t 13 >> 2 % - >> 1 &
+1 + *
+
+( t 7 >> 127 & + )
+
+9999999 x 1 + 25 * / t 1 15 x u + - << % / +
+
+x x * ^
+
+(t 8 >> 3 &)
+(t 15 >> 1 & * t 18 >> 1 & * 1 + *)
+
+
+2 * )
+
+( t 4 >> 122 & | )
+
+dup 118 t 8 >> 30 & +   & 1 *
+dup 60  t 8 >> 42 & + ~ & 2 *
+|
+|
+
+
+( 2 >> dup 7 + ^ dup 4 * | )
+( dup t 11 >> 26 & 30 + x + + ^ )
+
+(
+dup 127 &
+dup 72 &
+|
++
+)
+
+(optional filter)
+(
+214  &
+60 ~ &
+)
+
+(dup 126 & 2 /)
+(dup t 12 >> 127 & 20 + + |)
+(dup t 20 >> 7 & 3 + * &)
+(dup 3 * t ~ 9 >> 1 & * ^)
+
+255 & 2 / + 2 * 3 / dup)
+
+(255 & + 1 >> dup)
+
+v |

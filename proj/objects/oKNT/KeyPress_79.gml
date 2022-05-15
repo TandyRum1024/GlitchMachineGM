@@ -2,7 +2,8 @@
 var _file = get_open_filename("Text|*.txt", "");
 if (_file != "")
 {
-	glitch = glitch_load_file(_file);
+	glitch.load(_file, true);
+	dspRate = glitch.rate;
 	currentFile = _file;
 	
 	audio_free_play_queue(dspSound);
